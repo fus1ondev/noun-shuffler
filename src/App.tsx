@@ -129,7 +129,7 @@ function App() {
             const shareText = 
 `${generatedText}
 
-#名詞入れ替えジェネレーター
+#名詞シャッフルジェネレーター
 
 https://noun-shuffler.vercel.app/`;
             window.open(shareURL(shareText), "_blank", "noreferrer");
