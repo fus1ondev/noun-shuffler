@@ -9,7 +9,7 @@ const sanitizer = dompurify.sanitize;
 
 const AppContainer = styled.div`
   text-align: center;
-`
+`;
 
 function App() {
   let [enteredText, setEnteredText] = useState('');
@@ -29,53 +29,53 @@ function App() {
         resolve(tokens);
       });
     });
-  }
+  };
 
   const generate = async () => {
     setIsLoading(true);
     const tokens = await tokenize(enteredText);
     setTokens(tokens);
     setIsLoading(false);
-  }
+  };
 
   useEffect(() => {
-    const isNoun = (token: kuromoji.IpadicFeatures) => token.pos === '名詞' && !(ignoreHiragana && token.surface_form.match(/^[ぁ-んー]*$/))
+    const isNoun = (token: kuromoji.IpadicFeatures) => token.pos === '名詞' && !(ignoreHiragana && token.surface_form.match(/^[ぁ-んー]*$/));
 
-    const shuffledNouns = shuffle(tokens.filter(isNoun).map(token => token.surface_form))
-    let nounIndex = 0
+    const shuffledNouns = shuffle(tokens.filter(isNoun).map(token => token.surface_form));
+    let nounIndex = 0;
     const htmlElements = tokens.map(token => {
       if (isNoun(token)) {
         nounIndex++;
-        return `<span><b>${shuffledNouns[nounIndex - 1]}</b></span>`;
+        return `<b>${shuffledNouns[nounIndex - 1]}</b>`;
       } else {
         return token.surface_form.replace(/\n/g,'<br>');
       }
     })
     setGeneratedHtml(sanitizer(htmlElements.join('')));
 
-    nounIndex = 0
+    nounIndex = 0;
     const textElements = tokens.map(token => {
       if (isNoun(token)) {
         nounIndex++;
         return shuffledNouns[nounIndex - 1];
       } else {
-        return token.surface_form.replace(/\n/g,'<br>');
+        return token.surface_form;
       }
     })
     setGeneratedText(textElements.join(''));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[tokens])
+  }, [tokens]);
 
   const shuffle = (arr: Array<string>) => {
     var j, x, index;
     for (index = arr.length - 1; index > 0; index--) {
-        j = Math.floor(Math.random() * (index + 1));
-        x = arr[index];
-        arr[index] = arr[j];
-        arr[j] = x;
+      j = Math.floor(Math.random() * (index + 1));
+      x = arr[index];
+      arr[index] = arr[j];
+      arr[j] = x;
     }
     return arr;
-  }
+  };
   
   return (
     <AppContainer>
