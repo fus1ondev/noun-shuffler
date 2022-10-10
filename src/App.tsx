@@ -41,23 +41,27 @@ function App() {
   useEffect(() => {
     const isNoun = (token: kuromoji.IpadicFeatures) => token.pos === '名詞' && !(ignoreHiragana && token.surface_form.match(/^[ぁ-んー]*$/));
 
-    const shuffledNouns = shuffle(tokens.filter(isNoun).map(token => token.surface_form));
-    let nounIndex = 0;
+    const allNouns = tokens.filter(isNoun).map(token => token.surface_form);
+    const uniqueNouns = allNouns.filter((element, index) => {
+      return allNouns.indexOf(element) === index;
+    });
+    const shuffledUniqueNouns = shuffle(uniqueNouns);
+    const nounMap = Object.fromEntries(
+      uniqueNouns.map( ( e, i ) => [ e, shuffledUniqueNouns[i] ] )
+    );
+
     const htmlElements = tokens.map(token => {
       if (isNoun(token)) {
-        nounIndex++;
-        return `<b>${shuffledNouns[nounIndex - 1]}</b>`;
+        return `<b>${nounMap[token.surface_form]}</b>`;
       } else {
         return token.surface_form.replace(/\n/g,'<br>');
       }
-    })
+    });
     setGeneratedHtml(sanitizer(htmlElements.join('')));
 
-    nounIndex = 0;
     const textElements = tokens.map(token => {
       if (isNoun(token)) {
-        nounIndex++;
-        return shuffledNouns[nounIndex - 1];
+        return nounMap[token.surface_form];
       } else {
         return token.surface_form;
       }
@@ -66,17 +70,14 @@ function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tokens]);
 
-  const shuffle = (arr: Array<string>) => {
-    var j, x, index;
-    for (index = arr.length - 1; index > 0; index--) {
-      j = Math.floor(Math.random() * (index + 1));
-      x = arr[index];
-      arr[index] = arr[j];
-      arr[j] = x;
+  const shuffle = ([...array]) => {
+    for (let i = array.length - 1; i >= 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
     }
-    return arr;
+    return array;
   };
-  
+
   return (
     <AppContainer>
       <Heading marginY={10}>名詞シャッフルジェネレーター</Heading>
